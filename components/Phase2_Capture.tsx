@@ -1,88 +1,117 @@
 import React from 'react';
-import { Camera, Zap, Eye, Image as ImageIcon } from 'lucide-react';
+import { Camera, Zap, Eye, Image as ImageIcon, Aperture } from 'lucide-react';
+
+const capturePillars = [
+  {
+    title: 'The Dedicated Shoot',
+    description: 'Take 5 minutes separate from filming. Timeline screenshots are pixelated and noisy.',
+    icon: Camera,
+    color: 'from-brand-cyan/40 via-brand-cyan/5 to-transparent',
+    bullets: ['Shoot 20+ bursts', 'Lens at chest height', 'Props close to lens'],
+  },
+  {
+    title: 'Lighting & Expression',
+    description: 'Blast your face with light. Mobile thumbnails punish shadows and low contrast.',
+    icon: Zap,
+    color: 'from-brand-yellow/50 via-brand-yellow/10 to-transparent',
+    bullets: ['Overact by 20%', 'Chin slightly down', 'Feels cringe = Looks good'],
+  },
+  {
+    title: 'Macro Object Story',
+    description: 'Product review? Capture macro shots yourself. Google Images screams “stock”.',
+    icon: ImageIcon,
+    color: 'from-brand-magenta/40 via-brand-magenta/10 to-transparent',
+    bullets: ['Clean the subject', 'Use high depth of field', 'Add motion blur to background'],
+  },
+];
+
+const expressionList = ['Fear', 'Curiosity', 'Joy', 'Disgust', 'Anger', 'Shock'];
+const lightingChecklist = ['Key light high + soft', 'Fill light 30%', 'Rim light tinted', 'Catchlights visible'];
 
 const Phase2Capture: React.FC = () => {
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
-      <header className="space-y-2">
-        <h2 className="text-3xl font-bold text-white">Phase 2: Asset Capture</h2>
-        <p className="text-gray-400">Garbage In, Garbage Out. Stop using timeline screenshots.</p>
-      </header>
+    <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
+      <section className="rounded-3xl border border-white/10 bg-brand-carbon/60 backdrop-blur-xl p-6 md:p-10 shadow-card-lg space-y-4">
+        <div className="flex items-center gap-3 text-brand-cyan">
+          <Camera className="w-6 h-6" />
+          <span className="text-xs uppercase tracking-[0.4em] text-white/60">Phase 02 — Asset Capture</span>
+        </div>
+        <div className="flex flex-col lg:flex-row lg:items-end gap-6">
+          <div className="flex-1 space-y-3">
+            <h2 className="text-3xl md:text-4xl font-display text-white">Shoot like you’re designing a poster</h2>
+            <p className="text-white/70">
+              Garbage in, garbage out. Capture cinematic source material with aggressive expressions and
+              over-the-top lighting so the edit phase has real signal to push.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-4 text-sm text-white/70">
+            <div className="rounded-2xl border border-white/10 px-4 py-3 shadow-inner">
+              <p className="text-[10px] uppercase tracking-[0.4em] text-white/40">Shoot time</p>
+              <p className="font-display text-2xl text-white">12m</p>
+            </div>
+            <div className="rounded-2xl border border-white/10 px-4 py-3 shadow-inner">
+              <p className="text-[10px] uppercase tracking-[0.4em] text-white/40">Shots needed</p>
+              <p className="font-display text-2xl text-white">20+</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <div className="grid md:grid-cols-3 gap-6">
-        {/* Card 1 */}
-        <div className="bg-gradient-to-b from-white/10 to-transparent p-1 rounded-2xl">
-          <div className="bg-brand-gray h-full rounded-xl p-6 space-y-4">
-            <div className="w-12 h-12 bg-blue-500/20 text-blue-400 rounded-full flex items-center justify-center">
-              <Camera className="w-6 h-6" />
+        {capturePillars.map((pillar) => {
+          const Icon = pillar.icon;
+          return (
+            <div
+              key={pillar.title}
+              className="group relative rounded-3xl border border-white/10 bg-white/5 p-6 overflow-hidden shadow-card-lg hover:-translate-y-1 transition-transform"
+            >
+              <div
+                className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-gradient-to-b ${pillar.color}`}
+              ></div>
+              <div className="relative space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-brand-yellow">
+                  <Icon className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-display text-white">{pillar.title}</h3>
+                <p className="text-sm text-white/70">{pillar.description}</p>
+                <ul className="space-y-2 text-sm text-white/70">
+                  {pillar.bullets.map((bullet) => (
+                    <li key={bullet} className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-brand-yellow"></span>
+                      {bullet}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
-            <h3 className="text-xl font-bold text-white">The Dedicated Shoot</h3>
-            <p className="text-sm text-gray-400">Take 5 minutes while filming. Screenshots look amateur and pixelated.</p>
-            <ul className="text-sm space-y-2 text-gray-300 mt-4">
-              <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span> Take 20+ bursts.
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span> Hold props closer to lens.
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Card 2 */}
-        <div className="bg-gradient-to-b from-white/10 to-transparent p-1 rounded-2xl">
-          <div className="bg-brand-gray h-full rounded-xl p-6 space-y-4">
-            <div className="w-12 h-12 bg-brand-yellow/20 text-brand-yellow rounded-full flex items-center justify-center">
-              <Zap className="w-6 h-6" />
-            </div>
-            <h3 className="text-xl font-bold text-white">Lighting & Expression</h3>
-            <p className="text-sm text-gray-400">Blast your face with light. Shadows destroy details on mobile screens.</p>
-            <ul className="text-sm space-y-2 text-gray-300 mt-4">
-              <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 bg-brand-yellow rounded-full"></span> Overact by 20%.
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 bg-brand-yellow rounded-full"></span> Feels cringe = Looks good.
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Card 3 */}
-        <div className="bg-gradient-to-b from-white/10 to-transparent p-1 rounded-2xl">
-          <div className="bg-brand-gray h-full rounded-xl p-6 space-y-4">
-            <div className="w-12 h-12 bg-purple-500/20 text-purple-400 rounded-full flex items-center justify-center">
-              <ImageIcon className="w-6 h-6" />
-            </div>
-            <h3 className="text-xl font-bold text-white">Macro Objects</h3>
-            <p className="text-sm text-gray-400">Reviewing a product? Take a macro shot. Avoid Google Images.</p>
-            <ul className="text-sm space-y-2 text-gray-300 mt-4">
-              <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 bg-purple-400 rounded-full"></span> Clean the product first.
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 bg-purple-400 rounded-full"></span> High depth of field.
-              </li>
-            </ul>
-          </div>
-        </div>
+          );
+        })}
       </div>
 
-      <div className="bg-white/5 border border-white/10 p-6 rounded-xl flex items-center gap-6">
-        <div className="flex-1">
-          <h4 className="font-bold text-white mb-2">The Expression Checklist</h4>
-          <div className="flex gap-4 flex-wrap">
-             {['Fear', 'Curiosity', 'Joy', 'Disgust', 'Anger'].map(e => (
-               <div key={e} className="px-3 py-1 border border-white/20 rounded-full text-xs text-gray-300">
-                 {e}
-               </div>
-             ))}
+      <div className="rounded-3xl border border-white/10 bg-black/30 p-6 md:p-10 grid lg:grid-cols-3 gap-8 items-center shadow-inner">
+        <div className="space-y-3 lg:col-span-2">
+          <h4 className="text-xl font-display text-white flex items-center gap-3">
+            <Eye className="w-5 h-5 text-brand-yellow" /> Expression palette
+          </h4>
+          <p className="text-white/70 text-sm">Cycle through at least three emotions per shoot. Hold each for 2 seconds.</p>
+          <div className="flex flex-wrap gap-3">
+            {expressionList.map((emotion) => (
+              <span key={emotion} className="px-4 py-2 rounded-full border border-white/10 text-sm text-white/80">
+                {emotion}
+              </span>
+            ))}
           </div>
         </div>
-        <div className="h-16 w-px bg-white/10 hidden md:block"></div>
-        <div className="flex-1 text-sm text-gray-400">
-           <Eye className="w-4 h-4 inline mr-2 text-brand-yellow"/>
-           Eyes are the most important part of the image. Ensure they are sharp, open, and catching light (catchlights).
+        <div className="space-y-4">
+          <p className="text-xs uppercase tracking-[0.4em] text-white/40">Lighting strip</p>
+          <div className="rounded-2xl border border-white/5 bg-white/5 p-4 flex flex-col gap-3">
+            {lightingChecklist.map((tip) => (
+              <div key={tip} className="flex items-center gap-3 text-sm text-white/70">
+                <Aperture className="w-4 h-4 text-brand-cyan" />
+                {tip}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

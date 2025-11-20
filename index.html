@@ -11,21 +11,86 @@
           extend: {
             colors: {
               brand: {
-                yellow: '#FFD700', // Warning Yellow
+                midnight: '#03050B',
+                obsidian: '#080B12',
+                carbon: '#11131C',
+                smoke: '#1C1F2B',
+                slate: '#2B2F3D',
+                yellow: '#F7D46C',
+                cyan: '#55E5FF',
+                magenta: '#F86CF8',
+                lime: '#C4FF72',
+                warning: '#FF9F47',
                 black: '#0A0A0A',
-                gray: '#1F1F1F',
-                accent: '#00E5FF' // Cyan for tech feel
+                gray: '#1F1F2B'
               }
             },
+            backgroundImage: {
+              'stellar-field':
+                'radial-gradient(circle at 20% 20%, rgba(248,108,248,0.15), transparent 40%), radial-gradient(circle at 80% 0%, rgba(85,229,255,0.18), transparent 50%), radial-gradient(circle at 0% 80%, rgba(196,255,114,0.12), transparent 45%)',
+              'noir-grid':
+                'linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 0), linear-gradient(180deg, rgba(255,255,255,0.04) 1px, transparent 0)',
+            },
             fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-              display: ['Impact', 'sans-serif']
-            }
+              sans: ['General Sans', 'Inter', 'sans-serif'],
+              display: ['Space Grotesk', 'General Sans', 'sans-serif']
+            },
+            boxShadow: {
+              glow: '0 20px 80px rgba(87, 227, 255, 0.25)',
+              'inner-ring': 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+              'card-lg': '0 10px 40px rgba(0,0,0,0.6)',
+            },
+            blur: {
+              xs: '2px',
+            },
+            dropShadow: {
+              neon: '0 0 20px rgba(248,108,248,0.45)',
+            },
+            animation: {
+              float: 'float 6s ease-in-out infinite',
+              'pulse-slow': 'pulse-slow 8s ease-in-out infinite',
+              'spin-slow': 'spin 18s linear infinite',
+              shimmer: 'shimmer 2s linear infinite',
+            },
+            keyframes: {
+              float: {
+                '0%, 100%': { transform: 'translateY(0px)' },
+                '50%': { transform: 'translateY(-8px)' },
+              },
+              'pulse-slow': {
+                '0%, 100%': { opacity: 0.85 },
+                '50%': { opacity: 0.45 },
+              },
+              shimmer: {
+                '0%': { backgroundPosition: '-200% 50%' },
+                '100%': { backgroundPosition: '200% 50%' },
+              },
+            },
           }
         }
       }
     </script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Grotesk:wght@400;500;600;700&family=General+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      body {
+        background-color: #03050B;
+        background-image: radial-gradient(circle at 15% 20%, rgba(248,108,248,0.18), transparent 55%),
+          radial-gradient(circle at 80% 0%, rgba(85,229,255,0.15), transparent 45%),
+          radial-gradient(circle at 10% 100%, rgba(196,255,114,0.12), transparent 45%),
+          linear-gradient(120deg, #05060a 0%, #050d18 60%, #03050b 100%);
+        min-height: 100vh;
+      }
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background-image: url('https://grainy-gradients.vercel.app/noise.svg');
+        opacity: 0.35;
+        pointer-events: none;
+        z-index: -1;
+        mix-blend-mode: screen;
+      }
+    </style>
   <script type="importmap">
 {
   "imports": {
@@ -38,7 +103,7 @@
 }
 </script>
 </head>
-  <body class="bg-brand-black text-gray-200 antialiased overflow-hidden">
+  <body class="bg-brand-midnight text-gray-200 antialiased overflow-hidden selection:bg-brand-yellow selection:text-brand-obsidian">
     <div id="root" class="h-screen flex flex-col"></div>
   </body>
 </html>

@@ -1,10 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Upload, ScanEye, Image as ImageIcon, Monitor } from 'lucide-react';
+import React, { useState } from 'react';
+import { Upload, ScanEye, Image as ImageIcon, Monitor, Activity } from 'lucide-react';
+
+const checklistTags = ['B&W contrast', 'Mobile legibility', 'Context pop', 'File size <2MB'];
 
 const Phase4QC: React.FC = () => {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
-  
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -15,94 +17,125 @@ const Phase4QC: React.FC = () => {
     }
   };
 
+  const reset = () => {
+    setImageSrc(null);
+    setFileName(null);
+  };
+
   return (
-    <div className="max-w-6xl mx-auto space-y-8 animate-fade-in h-full flex flex-col">
-      <header className="space-y-2 shrink-0">
-        <h2 className="text-3xl font-bold text-white">Phase 4: The Squint Test</h2>
-        <p className="text-gray-400">Roast your own work. If it fails here, it fails on YouTube.</p>
-      </header>
+    <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
+      <section className="rounded-3xl border border-white/10 bg-brand-carbon/60 backdrop-blur-xl p-6 md:p-10 shadow-card-lg space-y-4">
+        <div className="flex items-center gap-3 text-brand-yellow">
+          <ScanEye className="w-6 h-6" />
+          <span className="text-xs uppercase tracking-[0.4em] text-white/60">Phase 04 — Diagnostics</span>
+        </div>
+        <div className="space-y-3">
+          <h2 className="text-3xl md:text-4xl font-display text-white">The Squint Test Lab</h2>
+          <p className="text-white/70">
+            Upload your current thumbnail candidate and run it through three brutal tests: value, mobile, and shelf
+            context. If it doesn’t survive here, it won’t survive the home feed.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {checklistTags.map((tag) => (
+            <span key={tag} className="px-3 py-1 rounded-full border border-white/10 text-xs uppercase tracking-[0.3em] text-white/60">
+              {tag}
+            </span>
+          ))}
+        </div>
+      </section>
 
       {!imageSrc ? (
-        <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-white/10 rounded-2xl bg-white/5 hover:bg-white/10 transition-colors p-12 text-center group cursor-pointer relative">
-           <input 
-             type="file" 
-             accept="image/*" 
-             onChange={handleFileChange}
-             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-           />
-           <div className="w-16 h-16 bg-brand-yellow/10 text-brand-yellow rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-             <Upload className="w-8 h-8" />
-           </div>
-           <h3 className="text-xl font-bold text-white mb-2">Upload Thumbnail Candidate</h3>
-           <p className="text-sm text-gray-400 max-w-md">
-             Upload your 1920x1080 or 1280x720 JPG/PNG. We will run the B&W, Zoom, and Context checks.
-           </p>
-        </div>
+        <label className="block rounded-3xl border-2 border-dashed border-white/10 bg-white/5 hover:border-white/40 transition p-12 text-center cursor-pointer space-y-4">
+          <div className="w-16 h-16 rounded-2xl bg-brand-yellow/10 text-brand-yellow flex items-center justify-center mx-auto">
+            <Upload className="w-8 h-8" />
+          </div>
+          <h3 className="text-2xl font-display text-white">Upload thumbnail candidate</h3>
+          <p className="text-white/60 max-w-md mx-auto text-sm">
+            Drop in a 1920×1080 or 1280×720 JPG/PNG. We’ll auto-run three lab diagnostics.
+          </p>
+          <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+        </label>
       ) : (
-        <div className="space-y-8 pb-12">
-          <div className="flex justify-between items-center bg-white/5 p-4 rounded-lg border border-white/10">
-            <span className="text-sm text-gray-300 font-mono">{fileName}</span>
-            <button 
-              onClick={() => { setImageSrc(null); setFileName(null); }}
-              className="text-xs text-red-400 hover:text-red-300 underline"
-            >
-              Clear Image
+        <div className="space-y-6">
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-5 flex flex-wrap items-center justify-between gap-4">
+            <div className="text-sm text-white/70 font-mono">{fileName}</div>
+            <button onClick={reset} className="text-xs uppercase tracking-[0.4em] text-red-300 hover:text-red-200">
+              Reset
             </button>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Test 1: B&W Check */}
-            <div className="space-y-3">
-               <div className="flex items-center gap-2 text-white font-bold">
-                 <ScanEye className="w-5 h-5 text-brand-yellow" /> The B&W Check
-               </div>
-               <p className="text-xs text-gray-400 mb-2">Does the subject still stand out? If it's grey soup, fix your values.</p>
-               <div className="relative aspect-video bg-black rounded-lg overflow-hidden border border-white/10 group">
-                  <img src={imageSrc} alt="B&W Check" className="w-full h-full object-cover grayscale contrast-125" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                     <span className="text-xs text-white font-mono">FILTER: GRAYSCALE + CONTRAST</span>
-                  </div>
-               </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="rounded-3xl border border-white/10 bg-black/30 p-5 space-y-3 shadow-inner">
+              <div className="flex items-center gap-3 text-white">
+                <ScanEye className="w-5 h-5 text-brand-yellow" />
+                <div>
+                  <p className="text-xs uppercase tracking-[0.4em] text-white/40">Test 01</p>
+                  <p className="font-display text-xl">B&W Check</p>
+                </div>
+              </div>
+              <p className="text-xs text-white/60">
+                Squint at it. If your main subject vanishes, your values are too similar.
+              </p>
+              <div className="aspect-video rounded-2xl overflow-hidden border border-white/10 relative group">
+                <img src={imageSrc} alt="B&W check" className="w-full h-full object-cover grayscale contrast-125" />
+                <span className="absolute bottom-3 right-3 text-[10px] uppercase tracking-[0.4em] bg-black/70 px-2 py-1 rounded-full text-white/70">
+                  Grayscale
+                </span>
+              </div>
             </div>
 
-             {/* Test 2: The Zoom Out */}
-             <div className="space-y-3">
-               <div className="flex items-center gap-2 text-white font-bold">
-                 <ImageIcon className="w-5 h-5 text-blue-400" /> The Mobile/Zoom Check
-               </div>
-               <p className="text-xs text-gray-400 mb-2">Can you read the text at 10% size? Simulates mobile browsing.</p>
-               <div className="relative aspect-video bg-brand-black rounded-lg border border-white/10 flex items-center justify-center p-8">
-                  {/* Mobile Simulation Container */}
-                  <div className="w-[160px] md:w-[200px] rounded overflow-hidden shadow-2xl ring-1 ring-white/20">
-                      <img src={imageSrc} alt="Small Check" className="w-full h-auto" />
-                  </div>
-               </div>
+            <div className="rounded-3xl border border-white/10 bg-black/30 p-5 space-y-3 shadow-inner">
+              <div className="flex items-center gap-3 text-white">
+                <ImageIcon className="w-5 h-5 text-brand-cyan" />
+                <div>
+                  <p className="text-xs uppercase tracking-[0.4em] text-white/40">Test 02</p>
+                  <p className="font-display text-xl">Mobile Zoom</p>
+                </div>
+              </div>
+              <p className="text-xs text-white/60">
+                Simulates 10% scale. Can a tired commuter read the typography?
+              </p>
+              <div className="aspect-video rounded-2xl border border-white/10 flex items-center justify-center bg-brand-midnight">
+                <div className="w-[160px] md:w-[200px] rounded-2xl overflow-hidden shadow-glow ring-1 ring-white/10">
+                  <img src={imageSrc} alt="Mobile check" className="w-full h-auto" />
+                </div>
+              </div>
             </div>
 
-            {/* Test 3: Competitor Context */}
-            <div className="space-y-3">
-               <div className="flex items-center gap-2 text-white font-bold">
-                 <Monitor className="w-5 h-5 text-purple-400" /> The Context Check
-               </div>
-               <p className="text-xs text-gray-400 mb-2">Does it disappear against a white background?</p>
-               <div className="relative aspect-video bg-[#F9F9F9] rounded-lg overflow-hidden border border-white/10 p-4 flex flex-col gap-2">
-                  {/* Fake YouTube UI */}
-                  <div className="flex gap-2">
-                     <div className="w-1/2 space-y-2 opacity-30 grayscale">
-                        <div className="aspect-video bg-gray-400 rounded"></div>
-                        <div className="h-2 w-3/4 bg-gray-400 rounded"></div>
-                     </div>
-                     <div className="w-1/2 space-y-2">
-                        <div className="aspect-video rounded overflow-hidden shadow-lg ring-1 ring-black/5 relative group">
-                           <img src={imageSrc} className="w-full h-full object-cover" />
-                           <div className="absolute bottom-1 right-1 bg-black text-white text-[8px] px-1 rounded">10:24</div>
-                        </div>
-                        <div className="h-2 w-full bg-gray-800 rounded"></div>
-                        <div className="h-2 w-1/2 bg-gray-400 rounded"></div>
-                     </div>
+            <div className="rounded-3xl border border-white/10 bg-black/30 p-5 space-y-3 shadow-inner">
+              <div className="flex items-center gap-3 text-white">
+                <Monitor className="w-5 h-5 text-brand-magenta" />
+                <div>
+                  <p className="text-xs uppercase tracking-[0.4em] text-white/40">Test 03</p>
+                  <p className="font-display text-xl">Shelf Context</p>
+                </div>
+              </div>
+              <p className="text-xs text-white/60">
+                Drop it in a fake feed. Does it pop against neutrals and bright competitors?
+              </p>
+              <div className="aspect-video rounded-2xl border border-white/10 bg-[#F5F5F5] p-4 flex gap-3">
+                <div className="flex-1 space-y-2 opacity-40">
+                  <div className="aspect-video bg-gray-300 rounded"></div>
+                  <div className="h-2 w-3/4 bg-gray-300 rounded"></div>
+                </div>
+                <div className="flex-1 space-y-2">
+                  <div className="aspect-video rounded-2xl overflow-hidden shadow-xl relative">
+                    <img src={imageSrc} alt="Context check" className="w-full h-full object-cover" />
+                    <span className="absolute bottom-1 right-1 text-[9px] bg-black text-white px-1 rounded">10:24</span>
                   </div>
-               </div>
+                  <div className="h-2 w-full bg-gray-800 rounded"></div>
+                  <div className="h-2 w-1/2 bg-gray-500 rounded"></div>
+                </div>
+              </div>
             </div>
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-5 flex items-center gap-4 text-sm text-white/60">
+            <Activity className="w-5 h-5 text-brand-yellow" />
+            <p>
+              Pro tip: screenshot the tests above and annotate issues for your editor. Iterate until all three chips glow.
+            </p>
           </div>
         </div>
       )}
