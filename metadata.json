@@ -1,0 +1,5 @@
+{
+  "name": "ThumbWar - CTR Warfare",
+  "description": "A tactical workflow assistant for YouTube thumbnails. Includes AI hook generation, QC tools, and a structured pipeline to stop the scroll.",
+  "requestFramePermissions": []
+}
