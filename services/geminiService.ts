@@ -1,13 +1,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { ThumbnailIdea } from "../types";
 
-const apiKey =
-  import.meta.env.VITE_GEMINI_API_KEY ||
-  process.env.GEMINI_API_KEY ||
-  process.env.VITE_GEMINI_API_KEY ||
-  process.env.API_KEY;
-
-const GEMINI_IMAGE_MODEL = "gemini-3.0-flash-image";
+const apiKey = process.env.API_KEY;
 
 // Initialize safely - if no key, we handle errors gracefully in the UI
 const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
@@ -62,38 +56,26 @@ export const generateThumbnailHooks = async (videoTitle: string): Promise<Thumbn
   }
 };
 
-const extractInlineImage = (response: any): string | null => {
-  for (const candidate of response.candidates || []) {
-    for (const part of candidate.content?.parts || []) {
-      if (part.inlineData?.data) {
-        const mimeType = part.inlineData.mimeType || "image/png";
-        return `data:${mimeType};base64,${part.inlineData.data}`;
-      }
-    }
-  }
-  return null;
-};
-
 export const generateThumbnailImage = async (
-  prompt: string,
-  aspectRatio: "16:9" | "1:1" | "9:16" = "16:9",
+  prompt: string, 
+  aspectRatio: '16:9' | '1:1' | '9:16' = '16:9',
   referenceImageBase64?: string
 ): Promise<string> => {
   if (!ai) {
     throw new Error("API Key not configured");
   }
 
-  // IF Reference Image exists -> Use Gemini 2.5 Flash Image (Image Editing/Variation)
+  // IF Reference Image exists -> Use Gemini 3 Pro Image (High-Quality Image Editing/Variation)
   if (referenceImageBase64) {
     const matches = referenceImageBase64.match(/^data:(.+);base64,(.+)$/);
     if (!matches) throw new Error("Invalid image format");
-    
+
     const mimeType = matches[1];
     const data = matches[2];
 
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash-image',
+            model: 'gemini-3-pro-image-preview',
             contents: {
                 parts: [
                     { inlineData: { mimeType, data } },
@@ -107,7 +89,7 @@ export const generateThumbnailImage = async (
             }
         });
 
-        // Gemini 2.5 Flash Image returns the image in the inlineData of the parts
+        // Gemini 3 Pro Image returns the image in the inlineData of the parts
         for (const part of response.candidates?.[0]?.content?.parts || []) {
             if (part.inlineData) {
                 return `data:image/png;base64,${part.inlineData.data}`;
@@ -127,26 +109,34 @@ export const generateThumbnailImage = async (
     }
   }
 
-  // IF NO Reference Image -> Use Imagen 3 (High Quality Text-to-Image)
+  // IF NO Reference Image -> Use Gemini 3 Pro Image (High Quality Text-to-Image)
   try {
-    const response = await ai.models.generateImages({
-      model: 'imagen-4.0-generate-001',
-      prompt: prompt,
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-pro-image-preview',
+      contents: prompt,
       config: {
-        numberOfImages: 1,
-        outputMimeType: 'image/jpeg',
-        aspectRatio: aspectRatio,
-      },
+        imageConfig: {
+          aspectRatio: aspectRatio
+        }
+      }
     });
-    
-    if (!response.generatedImages?.[0]?.image?.imageBytes) {
-        throw new Error("No image generated");
+
+    // Gemini 3 Pro Image returns the image in the inlineData of the parts
+    for (const part of response.candidates?.[0]?.content?.parts || []) {
+      if (part.inlineData) {
+        return `data:image/png;base64,${part.inlineData.data}`;
+      }
     }
 
-    const base64ImageBytes = response.generatedImages[0].image.imageBytes;
-    return `data:image/jpeg;base64,${base64ImageBytes}`;
+    // Fallback: Check if the model returned text explaining why it couldn't generate
+    const textPart = response.candidates?.[0]?.content?.parts?.find(p => p.text)?.text;
+    if (textPart) {
+      throw new Error(`Model declined: ${textPart}`);
+    }
+
+    throw new Error("No image generated in response");
   } catch (error) {
-    console.error("Gemini 3.0 Image Error:", error);
+    console.error("Gemini Image Gen Error:", error);
     throw error;
   }
 };
