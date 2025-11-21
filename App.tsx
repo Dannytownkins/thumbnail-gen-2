@@ -1,12 +1,13 @@
 import React, { useMemo, useState } from 'react';
 import Sidebar from './components/Sidebar';
+import AssetTray from './components/AssetTray';
 import { Phase } from './types';
 import Phase1Hook from './components/Phase1_Hook';
 import Phase2Capture from './components/Phase2_Capture';
 import Phase2bGenAI from './components/Phase2b_GenAI';
-import Phase3Edit from './components/Phase3_Edit';
+import Phase3Editor from './components/Phase3_Editor';
 import Phase4QC from './components/Phase4_QC';
-import Phase5Export from './components/Phase5_Export';
+import Phase5Variants from './components/Phase5_Variants';
 
 type PhaseMeta = {
   title: string;
@@ -102,11 +103,11 @@ const App: React.FC = () => {
       case Phase.AI_GENERATION:
         return <Phase2bGenAI />;
       case Phase.EDIT:
-        return <Phase3Edit />;
+        return <Phase3Editor />;
       case Phase.QC:
         return <Phase4QC />;
       case Phase.EXPORT:
-        return <Phase5Export />;
+        return <Phase5Variants />;
       default:
         return <Phase1Hook />;
     }
@@ -218,6 +219,9 @@ const App: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Asset Tray */}
+      <AssetTray />
 
       <div className="hidden md:block fixed bottom-6 right-6 z-40">
         <div className="bg-brand-obsidian/90 border border-white/10 rounded-3xl shadow-card-lg backdrop-blur-2xl p-5 w-64 space-y-4">

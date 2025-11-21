@@ -56,6 +56,58 @@ export const generateThumbnailHooks = async (videoTitle: string): Promise<Thumbn
   }
 };
 
+export const critiqueThumbnail = async (imageDataUrl: string): Promise<{critique: string; suggestions: string[]}> => {
+  if (!ai) {
+    throw new Error("API Key not configured");
+  }
+
+  const matches = imageDataUrl.match(/^data:(.+);base64,(.+)$/);
+  if (!matches) throw new Error("Invalid image format");
+  
+  const mimeType = matches[1];
+  const data = matches[2];
+
+  const prompt = `You are a YouTube thumbnail expert. Analyze this thumbnail and provide:
+1. A brief critique (2-3 sentences) covering composition, text readability, color contrast, and emotional impact.
+2. Three specific, actionable suggestions for improvement (text variations, layout changes, or visual tweaks).
+
+Return your response in JSON format with keys: "critique" (string) and "suggestions" (array of 3 strings).`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: {
+        parts: [
+          { inlineData: { mimeType, data } },
+          { text: prompt }
+        ]
+      },
+      config: {
+        responseMimeType: "application/json",
+        responseJsonSchema: {
+          type: Type.OBJECT,
+          properties: {
+            critique: { type: Type.STRING },
+            suggestions: {
+              type: Type.ARRAY,
+              items: { type: Type.STRING }
+            }
+          },
+          required: ["critique", "suggestions"]
+        }
+      }
+    });
+
+    const jsonString = response.text;
+    if (!jsonString) throw new Error("No response from AI");
+    
+    return JSON.parse(jsonString);
+  } catch (error) {
+    console.error("Gemini Critique Error:", error);
+    throw error;
+  }
+};
+
 export const generateThumbnailImage = async (
   prompt: string, 
   aspectRatio: '16:9' | '1:1' | '9:16' = '16:9',

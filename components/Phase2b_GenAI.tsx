@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { generateThumbnailImage } from '../services/geminiService';
+import { useProject } from '../contexts/ProjectContext';
 import {
   Sparkles,
   Download,
@@ -10,9 +11,11 @@ import {
   Upload,
   Timer,
   History,
+  Plus,
 } from 'lucide-react';
 
 const Phase2bGenAI: React.FC = () => {
+  const { addGeneratedAsset, addCapturedAsset } = useProject();
   const [prompt, setPrompt] = useState('');
   const [history, setHistory] = useState<string[]>([]);
   const [aspectRatio, setAspectRatio] = useState<'16:9' | '1:1' | '9:16'>('16:9');
@@ -37,12 +40,27 @@ const Phase2bGenAI: React.FC = () => {
     }
   };
 
+  const handleAddToProject = () => {
+    if (generatedImage) {
+      addGeneratedAsset({
+        name: prompt.slice(0, 50) || 'Generated Asset',
+        dataUrl: generatedImage,
+      });
+    }
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (ev) => {
-        setReferenceImage(ev.target?.result as string);
+        const dataUrl = ev.target?.result as string;
+        setReferenceImage(dataUrl);
+        // Also add to captured assets
+        addCapturedAsset({
+          name: file.name,
+          dataUrl: dataUrl,
+        });
       };
       reader.readAsDataURL(file);
     }
@@ -214,13 +232,21 @@ const Phase2bGenAI: React.FC = () => {
                     <span className="font-mono">
                       {referenceImage ? 'EDITED_ASSET_V1.PNG' : 'GENERATED_ASSET_V1.JPG'}
                     </span>
-                    <a
-                      href={generatedImage}
-                      download={`thumbwar_${referenceImage ? 'edit' : 'gen'}_${Date.now()}.png`}
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-white text-brand-obsidian font-semibold"
-                    >
-                      <Download className="w-4 h-4" /> Download
-                    </a>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handleAddToProject}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-gradient-to-r from-brand-teal to-brand-red text-brand-obsidian font-semibold shadow-glow"
+                      >
+                        <Plus className="w-4 h-4" /> Add to Project
+                      </button>
+                      <a
+                        href={generatedImage}
+                        download={`thumbwar_${referenceImage ? 'edit' : 'gen'}_${Date.now()}.png`}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-white text-brand-obsidian font-semibold"
+                      >
+                        <Download className="w-4 h-4" /> Download
+                      </a>
+                    </div>
                   </div>
                 </div>
               ) : (

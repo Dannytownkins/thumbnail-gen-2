@@ -1,28 +1,33 @@
 import React, { useState } from 'react';
 import { generateThumbnailHooks } from '../services/geminiService';
-import { ThumbnailIdea } from '../types';
-import { Sparkles, AlertCircle, Target, Activity } from 'lucide-react';
+import { useProject } from '../contexts/ProjectContext';
+import { Sparkles, AlertCircle, Target, Activity, ArrowRight, Check } from 'lucide-react';
 
 const chips = ['Copy Lab', 'Psych Hooks', 'Max 4 Words'];
 
 const Phase1Hook: React.FC = () => {
-  const [title, setTitle] = useState('');
+  const { title, setTitle: setProjectTitle, hookIdeas, setHookIdeas, selectedHook, setSelectedHook } = useProject();
+  const [localTitle, setLocalTitle] = useState(title);
   const [loading, setLoading] = useState(false);
-  const [ideas, setIdeas] = useState<ThumbnailIdea[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const handleGenerate = async () => {
-    if (!title.trim()) return;
+    if (!localTitle.trim()) return;
     setLoading(true);
     setError(null);
     try {
-      const results = await generateThumbnailHooks(title);
-      setIdeas(results);
+      const results = await generateThumbnailHooks(localTitle);
+      setHookIdeas(results);
+      setProjectTitle(localTitle);
     } catch (e) {
       setError('Failed to connect to AI strategy command. Ensure API Key is valid.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSelectHook = (hook: any) => {
+    setSelectedHook(hook);
   };
 
   return (
@@ -57,8 +62,17 @@ const Phase1Hook: React.FC = () => {
           <div className="lg:w-64 bg-black/30 border border-white/10 rounded-2xl p-5 space-y-4 shadow-inner">
             <div>
               <p className="text-xs uppercase tracking-[0.4em] text-white/40">Ideas in Queue</p>
-              <p className="font-display text-4xl text-white">{ideas.length.toString().padStart(2, '0')}</p>
+              <p className="font-display text-4xl text-white">{hookIdeas.length.toString().padStart(2, '0')}</p>
             </div>
+            {selectedHook && (
+              <div className="border-t border-white/5 pt-4">
+                <p className="text-xs uppercase tracking-[0.4em] text-white/40 mb-2">Selected</p>
+                <div className="rounded-xl bg-brand-teal/10 border border-brand-teal/30 p-3">
+                  <p className="text-sm font-display text-white">"{selectedHook.text}"</p>
+                  <p className="text-xs text-white/60 mt-1">{selectedHook.emotion}</p>
+                </div>
+              </div>
+            )}
             <div className="border-t border-white/5 pt-4 space-y-3 text-sm">
               <div className="flex items-center gap-3 text-white/70">
                 <Target className="w-4 h-4 text-brand-yellow" />
@@ -128,14 +142,14 @@ const Phase1Hook: React.FC = () => {
             <div className="rounded-2xl bg-black/40 border border-white/10 flex flex-col md:flex-row items-stretch md:items-center gap-3 p-3 focus-within:border-brand-cyan/60 focus-within:ring-1 focus-within:ring-brand-cyan/60 transition">
               <input
                 type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                value={localTitle}
+                onChange={(e) => setLocalTitle(e.target.value)}
                 placeholder="e.g., I Survived 50 Hours in Antarctica"
                 className="flex-1 bg-transparent text-white placeholder:text-white/30 text-lg font-display outline-none px-2"
               />
               <button
                 onClick={handleGenerate}
-                disabled={loading || !title.trim()}
+                disabled={loading || !localTitle.trim()}
                 className="inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 font-semibold text-brand-obsidian bg-gradient-to-r from-brand-teal to-brand-red shadow-glow disabled:opacity-40 disabled:cursor-not-allowed transition active:scale-[0.98]"
               >
                 {loading ? 'Thinking…' : (
@@ -155,34 +169,57 @@ const Phase1Hook: React.FC = () => {
           </div>
 
           <div className="space-y-4">
-            {ideas.length === 0 && !loading && (
+            {hookIdeas.length === 0 && !loading && (
               <div className="rounded-3xl border-2 border-dashed border-white/10 bg-white/5 p-10 text-center text-white/50">
                 Enter your video title to receive tactical text suggestions.
               </div>
             )}
 
-            {ideas.map((idea, idx) => (
-              <div
-                key={`${idea.text}-${idx}`}
-                className="rounded-3xl border border-white/10 bg-gradient-to-br from-white/5 to-white/0 px-5 py-6 shadow-card-lg relative overflow-hidden group"
-                style={{ animationDelay: `${idx * 100}ms` }}
-              >
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-brand-cyan/5 pointer-events-none"></div>
-                <div className="relative flex flex-col gap-3">
-                  <div className="flex justify-between items-start">
-                    <h4 className="text-2xl font-display text-white">
-                      “{idea.text}”
-                    </h4>
-                    <span className="text-[11px] uppercase tracking-[0.4em] px-3 py-1 rounded-full bg-white/5 text-white/60">
-                      {idea.emotion}
-                    </span>
+            {hookIdeas.map((idea, idx) => {
+              const isSelected = selectedHook?.text === idea.text;
+              return (
+                <div
+                  key={`${idea.text}-${idx}`}
+                  className={`rounded-3xl border px-5 py-6 shadow-card-lg relative overflow-hidden group cursor-pointer transition-all ${
+                    isSelected
+                      ? 'border-brand-teal bg-brand-teal/10'
+                      : 'border-white/10 bg-gradient-to-br from-white/5 to-white/0 hover:border-brand-cyan/40'
+                  }`}
+                  style={{ animationDelay: `${idx * 100}ms` }}
+                  onClick={() => handleSelectHook(idea)}
+                >
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-brand-cyan/5 pointer-events-none"></div>
+                  <div className="relative flex flex-col gap-3">
+                    <div className="flex justify-between items-start gap-4">
+                      <h4 className="text-2xl font-display text-white flex-1">
+                        "{idea.text}"
+                      </h4>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] uppercase tracking-[0.4em] px-3 py-1 rounded-full bg-white/5 text-white/60">
+                          {idea.emotion}
+                        </span>
+                        {isSelected && (
+                          <div className="w-6 h-6 rounded-full bg-brand-teal flex items-center justify-center">
+                            <Check className="w-4 h-4 text-brand-obsidian" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-sm text-white/70 border-l-2 border-brand-cyan/40 pl-4">
+                      {idea.reasoning}
+                    </p>
+                    {isSelected && (
+                      <div className="pt-3 border-t border-white/10">
+                        <button className="inline-flex items-center gap-2 text-sm font-semibold text-brand-teal hover:text-brand-cyan transition">
+                          <ArrowRight className="w-4 h-4" />
+                          This hook will be added to your canvas
+                        </button>
+                      </div>
+                    )}
                   </div>
-                  <p className="text-sm text-white/70 border-l-2 border-brand-cyan/40 pl-4">
-                    {idea.reasoning}
-                  </p>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
