@@ -66,7 +66,90 @@ const Phase3_Editor: React.FC = () => {
       saveCanvasState();
     });
 
+    // Keyboard shortcuts
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const activeObject = canvas.getActiveObject();
+      if (!activeObject) return;
+
+      // Delete/Backspace - delete selected object
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        e.preventDefault();
+        canvas.remove(activeObject);
+        canvas.renderAll();
+        setSelectedObject(null);
+      }
+
+      // Ctrl/Cmd + D - duplicate object
+      if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+        e.preventDefault();
+        activeObject.clone((cloned: any) => {
+          cloned.set({
+            left: (activeObject.left || 0) + 20,
+            top: (activeObject.top || 0) + 20,
+          });
+          canvas.add(cloned);
+          canvas.setActiveObject(cloned);
+          canvas.renderAll();
+        });
+      }
+
+      // Arrow keys - move object
+      const moveAmount = e.shiftKey ? 10 : 1;
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        activeObject.set({ left: (activeObject.left || 0) - moveAmount });
+        canvas.renderAll();
+      }
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        activeObject.set({ left: (activeObject.left || 0) + moveAmount });
+        canvas.renderAll();
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        activeObject.set({ top: (activeObject.top || 0) - moveAmount });
+        canvas.renderAll();
+      }
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        activeObject.set({ top: (activeObject.top || 0) + moveAmount });
+        canvas.renderAll();
+      }
+
+      // Ctrl/Cmd + Z - undo (basic - just clear selection)
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        e.preventDefault();
+        canvas.discardActiveObject();
+        canvas.renderAll();
+      }
+
+      // Bracket keys - layer ordering
+      if (e.key === '[') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          canvas.sendObjectToBack(activeObject);
+        } else {
+          canvas.sendObjectBackwards(activeObject);
+        }
+        canvas.renderAll();
+        saveCanvasState();
+      }
+      if (e.key === ']') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          canvas.bringObjectToFront(activeObject);
+        } else {
+          canvas.bringObjectForward(activeObject);
+        }
+        canvas.renderAll();
+        saveCanvasState();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
     return () => {
+      window.removeEventListener('keydown', handleKeyDown);
       canvas.dispose();
     };
   }, []);
@@ -218,6 +301,32 @@ const Phase3_Editor: React.FC = () => {
         <p className="text-white/70">
           Drag assets from your library, add text layers, adjust filters, and export when ready. Your work auto-saves.
         </p>
+        
+        {/* Keyboard Shortcuts */}
+        <details className="group">
+          <summary className="text-sm text-white/60 cursor-pointer hover:text-white/80 transition flex items-center gap-2">
+            <span>⌨️ Keyboard Shortcuts</span>
+            <span className="text-xs opacity-50">(click to expand)</span>
+          </summary>
+          <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+            <div className="bg-black/30 p-2 rounded-xl">
+              <kbd className="px-2 py-1 bg-white/10 rounded text-white/80">Delete</kbd>
+              <p className="text-white/60 mt-1">Delete object</p>
+            </div>
+            <div className="bg-black/30 p-2 rounded-xl">
+              <kbd className="px-2 py-1 bg-white/10 rounded text-white/80">Ctrl+D</kbd>
+              <p className="text-white/60 mt-1">Duplicate</p>
+            </div>
+            <div className="bg-black/30 p-2 rounded-xl">
+              <kbd className="px-2 py-1 bg-white/10 rounded text-white/80">Arrows</kbd>
+              <p className="text-white/60 mt-1">Move (+ Shift = 10px)</p>
+            </div>
+            <div className="bg-black/30 p-2 rounded-xl">
+              <kbd className="px-2 py-1 bg-white/10 rounded text-white/80">[ ]</kbd>
+              <p className="text-white/60 mt-1">Layer order (+ Shift)</p>
+            </div>
+          </div>
+        </details>
       </section>
 
       <div className="grid lg:grid-cols-[1fr_320px] gap-6">
