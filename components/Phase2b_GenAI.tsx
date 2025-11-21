@@ -12,6 +12,7 @@ import {
   Timer,
   History,
   Plus,
+  Check,
 } from 'lucide-react';
 
 const Phase2bGenAI: React.FC = () => {
@@ -40,12 +41,16 @@ const Phase2bGenAI: React.FC = () => {
     }
   };
 
+  const [addedToProject, setAddedToProject] = useState(false);
+
   const handleAddToProject = () => {
     if (generatedImage) {
       addGeneratedAsset({
         name: prompt.slice(0, 50) || 'Generated Asset',
         dataUrl: generatedImage,
       });
+      setAddedToProject(true);
+      setTimeout(() => setAddedToProject(false), 2000);
     }
   };
 
@@ -235,9 +240,21 @@ const Phase2bGenAI: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={handleAddToProject}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-gradient-to-r from-brand-teal to-brand-red text-brand-obsidian font-semibold shadow-glow"
+                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-2xl font-semibold shadow-glow transition ${
+                          addedToProject
+                            ? 'bg-green-500 text-white'
+                            : 'bg-gradient-to-r from-brand-teal to-brand-red text-brand-obsidian'
+                        }`}
                       >
-                        <Plus className="w-4 h-4" /> Add to Project
+                        {addedToProject ? (
+                          <>
+                            <Check className="w-4 h-4" /> Added!
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="w-4 h-4" /> Add to Project
+                          </>
+                        )}
                       </button>
                       <a
                         href={generatedImage}
