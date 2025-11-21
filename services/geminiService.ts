@@ -1,7 +1,11 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { ThumbnailIdea } from "../types";
 
-const apiKey = process.env.API_KEY;
+const apiKey =
+  import.meta.env.VITE_GEMINI_API_KEY ||
+  process.env.GEMINI_API_KEY ||
+  process.env.VITE_GEMINI_API_KEY ||
+  process.env.API_KEY;
 
 // Initialize safely - if no key, we handle errors gracefully in the UI
 const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;

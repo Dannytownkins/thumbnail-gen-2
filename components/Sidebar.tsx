@@ -117,7 +117,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPhase, setPhase }) => {
             </div>
             <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-brand-yellow via-brand-cyan to-brand-magenta rounded-full transition-all duration-500"
+                className="h-full bg-brand-cyan rounded-full shadow-glow transition-all duration-500"
                 style={{ width: `${progressPercent}%` }}
               ></div>
             </div>

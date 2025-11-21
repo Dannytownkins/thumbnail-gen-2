@@ -142,7 +142,7 @@ const App: React.FC = () => {
                 </div>
                 <div className="h-2 bg-white/10 rounded-full overflow-hidden shadow-inner">
                   <div
-                    className="h-full bg-gradient-to-r from-brand-cyan via-brand-yellow to-brand-magenta rounded-full shadow-glow transition-all duration-500"
+                    className="h-full bg-brand-cyan rounded-full shadow-glow transition-all duration-500"
                     style={{ width: `${progressPercent}%` }}
                   ></div>
                 </div>
