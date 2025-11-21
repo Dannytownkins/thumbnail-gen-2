@@ -56,6 +56,86 @@ export const generateThumbnailHooks = async (videoTitle: string): Promise<Thumbn
   }
 };
 
+export const generateComposition = async (
+  hookText: string,
+  imageDataUrls: string[]
+): Promise<{
+  layout: 'center' | 'left' | 'right' | 'split';
+  textPosition: { x: number; y: number };
+  textSize: number;
+  imagePositions: Array<{ x: number; y: number; scale: number; zIndex: number }>;
+  reasoning: string;
+}> => {
+  if (!ai) {
+    throw new Error("API Key not configured");
+  }
+
+  const prompt = `You are a professional thumbnail designer. Given this hook text and ${imageDataUrls.length} image(s), create an optimal composition for a 1920x1080 YouTube thumbnail.
+
+Hook Text: "${hookText}"
+
+Provide a composition layout with:
+1. Overall layout strategy (center, left, right, or split)
+2. Text position (x, y coordinates where 0,0 is top-left)
+3. Text size (60-180 recommended)
+4. For each of the ${imageDataUrls.length} image(s), provide position (x, y), scale (0.5-1.5), and zIndex (1-10, higher is front)
+
+Consider:
+- Text should be highly readable
+- Main subject should be prominent
+- Follow rule of thirds when possible
+- Text should contrast with background
+- Leave breathing room
+
+Return JSON format with: layout, textPosition {x, y}, textSize, imagePositions [{x, y, scale, zIndex}], reasoning`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseJsonSchema: {
+          type: Type.OBJECT,
+          properties: {
+            layout: { type: Type.STRING },
+            textPosition: {
+              type: Type.OBJECT,
+              properties: {
+                x: { type: Type.NUMBER },
+                y: { type: Type.NUMBER }
+              }
+            },
+            textSize: { type: Type.NUMBER },
+            imagePositions: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  x: { type: Type.NUMBER },
+                  y: { type: Type.NUMBER },
+                  scale: { type: Type.NUMBER },
+                  zIndex: { type: Type.NUMBER }
+                }
+              }
+            },
+            reasoning: { type: Type.STRING }
+          },
+          required: ["layout", "textPosition", "textSize", "imagePositions", "reasoning"]
+        }
+      }
+    });
+
+    const jsonString = response.text;
+    if (!jsonString) throw new Error("No response from AI");
+    
+    return JSON.parse(jsonString);
+  } catch (error) {
+    console.error("Gemini Composition Error:", error);
+    throw error;
+  }
+};
+
 export const critiqueThumbnail = async (imageDataUrl: string): Promise<{critique: string; suggestions: string[]}> => {
   if (!ai) {
     throw new Error("API Key not configured");

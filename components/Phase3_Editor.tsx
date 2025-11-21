@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as fabric from 'fabric';
 import { useProject } from '../contexts/ProjectContext';
+import { generateComposition } from '../services/geminiService';
 import {
   Layers,
   Type,
@@ -11,6 +12,7 @@ import {
   ArrowDown,
   Sun,
   Contrast,
+  Wand2,
 } from 'lucide-react';
 
 const Phase3_Editor: React.FC = () => {
@@ -18,6 +20,8 @@ const Phase3_Editor: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricRef = useRef<fabric.Canvas | null>(null);
   const [selectedObject, setSelectedObject] = useState<fabric.Object | null>(null);
+  const [generatingComposition, setGeneratingComposition] = useState(false);
+  const [compositionReasoning, setCompositionReasoning] = useState<string | null>(null);
   
   const allAssets = [...capturedAssets, ...generatedAssets];
 
@@ -290,6 +294,75 @@ const Phase3_Editor: React.FC = () => {
     link.click();
   };
 
+  const generateAIComposition = async () => {
+    if (!fabricRef.current || !selectedHook || allAssets.length === 0) return;
+
+    setGeneratingComposition(true);
+    setCompositionReasoning(null);
+
+    try {
+      // Clear canvas first
+      fabricRef.current.clear();
+      fabricRef.current.backgroundColor = '#0A0A0A';
+
+      const composition = await generateComposition(
+        selectedHook.text,
+        allAssets.slice(0, 3).map(a => a.dataUrl) // Limit to 3 images
+      );
+
+      setCompositionReasoning(composition.reasoning);
+
+      // Add images with AI positioning
+      const imagePromises = allAssets.slice(0, composition.imagePositions.length).map(async (asset, idx) => {
+        const pos = composition.imagePositions[idx];
+        const img = await fabric.FabricImage.fromURL(asset.dataUrl, {
+          crossOrigin: 'anonymous',
+        });
+
+        img.set({
+          left: pos.x,
+          top: pos.y,
+          scaleX: pos.scale,
+          scaleY: pos.scale,
+        });
+
+        // Set z-index by adding in order (higher zIndex added later = on top)
+        return { img, zIndex: pos.zIndex };
+      });
+
+      const images = await Promise.all(imagePromises);
+      images.sort((a, b) => a.zIndex - b.zIndex);
+      images.forEach(({ img }) => fabricRef.current?.add(img));
+
+      // Add text with AI positioning
+      const textObj = new fabric.IText(selectedHook.text, {
+        left: composition.textPosition.x,
+        top: composition.textPosition.y,
+        fontFamily: 'Impact, Arial Black, sans-serif',
+        fontSize: composition.textSize,
+        fill: '#FFD700',
+        stroke: '#000000',
+        strokeWidth: Math.max(4, composition.textSize / 20),
+        fontWeight: 'bold',
+        textAlign: 'center',
+        shadow: {
+          color: 'rgba(0,0,0,0.8)',
+          blur: 15,
+          offsetX: 4,
+          offsetY: 4,
+        },
+      });
+
+      fabricRef.current.add(textObj);
+      fabricRef.current.renderAll();
+      saveCanvasState();
+    } catch (error) {
+      console.error('AI Composition error:', error);
+    } finally {
+      setGeneratingComposition(false);
+    }
+  };
+
   return (
     <div className="max-w-full mx-auto space-y-6 animate-fade-in">
       <section className="rounded-3xl border border-white/10 bg-brand-carbon/60 backdrop-blur-xl p-6 md:p-8 shadow-card-lg space-y-3">
@@ -337,6 +410,43 @@ const Phase3_Editor: React.FC = () => {
               <canvas ref={canvasRef} className="w-full h-full" style={{ maxWidth: '100%' }} />
             </div>
           </div>
+
+          {/* AI Composition */}
+          {selectedHook && allAssets.length > 0 && (
+            <div className="rounded-3xl border border-brand-teal/30 bg-brand-teal/10 backdrop-blur-xl p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-display text-lg text-white">AI Auto-Compose</h3>
+                  <p className="text-xs text-white/60 mt-1">
+                    Let Gemini arrange your hook text and assets into an optimal layout
+                  </p>
+                </div>
+                <button
+                  onClick={generateAIComposition}
+                  disabled={generatingComposition}
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-brand-teal to-brand-red text-brand-obsidian font-semibold shadow-glow disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {generatingComposition ? (
+                    <>
+                      <Wand2 className="w-4 h-4 animate-spin" />
+                      Composing...
+                    </>
+                  ) : (
+                    <>
+                      <Wand2 className="w-4 h-4" />
+                      Generate Layout
+                    </>
+                  )}
+                </button>
+              </div>
+              {compositionReasoning && (
+                <div className="rounded-2xl border border-white/10 bg-black/30 p-4 text-sm text-white/70">
+                  <p className="text-xs uppercase tracking-[0.4em] text-white/40 mb-2">AI Reasoning</p>
+                  {compositionReasoning}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Toolbar */}
           <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 flex flex-wrap items-center gap-3">
