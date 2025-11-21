@@ -139,14 +139,30 @@ const Phase3_Editor: React.FC = () => {
 
   const bringForward = () => {
     if (!fabricRef.current || !selectedObject) return;
-    fabricRef.current.bringForward(selectedObject);
+    fabricRef.current.bringObjectForward(selectedObject);
     fabricRef.current.renderAll();
+    saveCanvasState();
   };
 
   const sendBackward = () => {
     if (!fabricRef.current || !selectedObject) return;
-    fabricRef.current.sendBackwards(selectedObject);
+    fabricRef.current.sendObjectBackwards(selectedObject);
     fabricRef.current.renderAll();
+    saveCanvasState();
+  };
+
+  const bringToFront = () => {
+    if (!fabricRef.current || !selectedObject) return;
+    fabricRef.current.bringObjectToFront(selectedObject);
+    fabricRef.current.renderAll();
+    saveCanvasState();
+  };
+
+  const sendToBack = () => {
+    if (!fabricRef.current || !selectedObject) return;
+    fabricRef.current.sendObjectToBack(selectedObject);
+    fabricRef.current.renderAll();
+    saveCanvasState();
   };
 
   const adjustBrightness = (delta: number) => {
@@ -228,6 +244,15 @@ const Phase3_Editor: React.FC = () => {
                 <div className="w-px h-6 bg-white/10"></div>
                 
                 <button
+                  onClick={bringToFront}
+                  className="inline-flex items-center gap-2 px-3 py-2 rounded-2xl bg-white/10 text-white hover:bg-white/20 transition"
+                  title="Bring to Front"
+                >
+                  <ArrowUp className="w-4 h-4" />
+                  <ArrowUp className="w-4 h-4 -ml-3" />
+                </button>
+
+                <button
                   onClick={bringForward}
                   className="inline-flex items-center gap-2 px-3 py-2 rounded-2xl bg-white/10 text-white hover:bg-white/20 transition"
                   title="Bring Forward"
@@ -241,6 +266,15 @@ const Phase3_Editor: React.FC = () => {
                   title="Send Backward"
                 >
                   <ArrowDown className="w-4 h-4" />
+                </button>
+
+                <button
+                  onClick={sendToBack}
+                  className="inline-flex items-center gap-2 px-3 py-2 rounded-2xl bg-white/10 text-white hover:bg-white/20 transition"
+                  title="Send to Back"
+                >
+                  <ArrowDown className="w-4 h-4" />
+                  <ArrowDown className="w-4 h-4 -ml-3" />
                 </button>
 
                 {selectedObject instanceof fabric.FabricImage && (
