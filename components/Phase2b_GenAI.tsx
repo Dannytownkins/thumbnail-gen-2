@@ -64,7 +64,7 @@ const Phase2bGenAI: React.FC = () => {
         <div className="relative space-y-3">
           <h2 className="text-3xl md:text-4xl font-display text-white">Fabricate props or rewrite reality</h2>
           <p className="text-white/70">
-            Use Gemini 2.5 Flash Image for reference-guided edits or Imagen 4 for wild concepts.
+            Powered by Gemini 3 Pro Image for studio-quality generation and editing.
             Keep prompts specific about lighting, lens choice, and the emotional read.
           </p>
         </div>
