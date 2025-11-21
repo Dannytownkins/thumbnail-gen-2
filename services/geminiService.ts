@@ -37,7 +37,7 @@ export const generateThumbnailHooks = async (videoTitle: string): Promise<Thumbn
       contents: prompt,
       config: {
         responseMimeType: "application/json",
-        responseSchema: {
+        responseJsonSchema: {
           type: Type.ARRAY,
           items: {
             type: Type.OBJECT,
@@ -83,57 +83,68 @@ export const generateThumbnailImage = async (
     throw new Error("API Key not configured");
   }
 
-  const userParts: any[] = [];
-
+  // IF Reference Image exists -> Use Gemini 2.5 Flash Image (Image Editing/Variation)
   if (referenceImageBase64) {
     const matches = referenceImageBase64.match(/^data:(.+);base64,(.+)$/);
-    if (!matches) {
-      throw new Error("Invalid image format");
-    }
-
+    if (!matches) throw new Error("Invalid image format");
+    
     const mimeType = matches[1];
     const data = matches[2];
 
-    userParts.push({
-      inlineData: { mimeType, data },
-    });
-    userParts.push({
-      text: `Apply the following edits while preserving structure: ${prompt}`,
-    });
-  } else {
-    userParts.push({
-      text: `Generate a high fidelity YouTube thumbnail concept with aspect ratio ${aspectRatio}. ${prompt}`,
-    });
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash-image',
+            contents: {
+                parts: [
+                    { inlineData: { mimeType, data } },
+                    { text: prompt }
+                ]
+            },
+            config: {
+                imageConfig: {
+                    aspectRatio: aspectRatio
+                }
+            }
+        });
+
+        // Gemini 2.5 Flash Image returns the image in the inlineData of the parts
+        for (const part of response.candidates?.[0]?.content?.parts || []) {
+            if (part.inlineData) {
+                return `data:image/png;base64,${part.inlineData.data}`;
+            }
+        }
+        
+        // Fallback: Check if the model returned text explaining why it couldn't generate
+        const textPart = response.candidates?.[0]?.content?.parts?.find(p => p.text)?.text;
+        if (textPart) {
+            throw new Error(`Model declined: ${textPart}`);
+        }
+        
+        throw new Error("No image generated in response");
+    } catch (error) {
+        console.error("Gemini Image Edit Error:", error);
+        throw error;
+    }
   }
 
+  // IF NO Reference Image -> Use Imagen 3 (High Quality Text-to-Image)
   try {
-    const response = await ai.models.generateContent({
-      model: GEMINI_IMAGE_MODEL,
-      contents: [
-        {
-          role: "user",
-          parts: userParts,
-        },
-      ],
+    const response = await ai.models.generateImages({
+      model: 'imagen-4.0-generate-001',
+      prompt: prompt,
       config: {
-        imageConfig: {
-          aspectRatio,
-        },
+        numberOfImages: 1,
+        outputMimeType: 'image/jpeg',
+        aspectRatio: aspectRatio,
       },
     });
-
-    const image = extractInlineImage(response);
-    if (image) {
-      return image;
+    
+    if (!response.generatedImages?.[0]?.image?.imageBytes) {
+        throw new Error("No image generated");
     }
 
-    const declineReason =
-      response.candidates?.[0]?.content?.parts?.find((part: any) => part.text)?.text;
-    if (declineReason) {
-      throw new Error(declineReason);
-    }
-
-    throw new Error("No image generated in response");
+    const base64ImageBytes = response.generatedImages[0].image.imageBytes;
+    return `data:image/jpeg;base64,${base64ImageBytes}`;
   } catch (error) {
     console.error("Gemini 3.0 Image Error:", error);
     throw error;

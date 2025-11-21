@@ -66,7 +66,7 @@ const Phase1Hook: React.FC = () => {
               </div>
               <div className="flex items-center gap-3 text-white/70">
                 <Activity className="w-4 h-4 text-brand-cyan" />
-                <span>Latency: ~2s (Gemini 2.5 Flash)</span>
+                <span>Powered by Gemini 2.5 Flash</span>
               </div>
             </div>
           </div>
