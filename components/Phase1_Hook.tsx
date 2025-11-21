@@ -136,7 +136,7 @@ const Phase1Hook: React.FC = () => {
               <button
                 onClick={handleGenerate}
                 disabled={loading || !title.trim()}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 font-semibold text-brand-obsidian bg-gradient-to-r from-brand-cyan to-brand-yellow shadow-glow disabled:opacity-40 disabled:cursor-not-allowed transition active:scale-[0.98]"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 font-semibold text-brand-obsidian bg-gradient-to-r from-brand-teal to-brand-red shadow-glow disabled:opacity-40 disabled:cursor-not-allowed transition active:scale-[0.98]"
               >
                 {loading ? 'Thinking…' : (
                   <>

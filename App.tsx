@@ -65,6 +65,13 @@ const phaseMeta: Record<Phase, PhaseMeta> = {
 
 const contextChips = ['CTR Warfare Lab', 'Gemini Operator Ready', 'Hi-Fi Workflow v2'];
 
+const opsSnapshot = [
+  { label: 'Shots queued', value: '24' },
+  { label: 'AI credits', value: '86%' },
+  { label: 'QC passes', value: '02/05' },
+  { label: 'Exports ready', value: '2' },
+];
+
 const App: React.FC = () => {
   const [currentPhase, setPhase] = useState<Phase>(Phase.PRE_PRODUCTION);
 
@@ -142,7 +149,7 @@ const App: React.FC = () => {
                 </div>
                 <div className="h-2 bg-white/10 rounded-full overflow-hidden shadow-inner">
                   <div
-                    className="h-full bg-brand-cyan rounded-full shadow-glow transition-all duration-500"
+                    className="h-full bg-gradient-to-r from-brand-teal to-brand-red rounded-full shadow-glow transition-all duration-500"
                     style={{ width: `${progressPercent}%` }}
                   ></div>
                 </div>
@@ -204,10 +211,24 @@ const App: React.FC = () => {
             <button
               onClick={handleNext}
               disabled={!nextPhase}
-              className="px-5 py-2 rounded-2xl text-sm font-bold bg-gradient-to-r from-brand-cyan to-brand-yellow text-brand-obsidian shadow-glow disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.97] transition"
+              className="px-5 py-2 rounded-2xl text-sm font-bold bg-gradient-to-r from-brand-teal to-brand-red text-brand-obsidian shadow-glow disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.97] transition"
             >
               Next
             </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="hidden md:block fixed bottom-6 right-6 z-40">
+        <div className="bg-brand-obsidian/90 border border-white/10 rounded-3xl shadow-card-lg backdrop-blur-2xl p-5 w-64 space-y-4">
+          <p className="text-[11px] uppercase tracking-[0.4em] text-white/40">Ops Snapshot</p>
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            {opsSnapshot.map((stat) => (
+              <div key={stat.label} className="bg-white/5 border border-white/5 rounded-2xl px-3 py-2 shadow-inner">
+                <p className="text-[10px] uppercase tracking-[0.4em] text-white/40">{stat.label}</p>
+                <p className="font-display text-xl text-white mt-1">{stat.value}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>

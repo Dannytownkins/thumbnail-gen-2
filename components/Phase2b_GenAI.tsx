@@ -126,13 +126,13 @@ const Phase2bGenAI: React.FC = () => {
             <div className="space-y-3">
               <p className="text-xs uppercase tracking-[0.4em] text-white/40">Aspect Ratio</p>
               <div className="grid grid-cols-3 gap-2">
-                {(['16:9', '1:1', '9:16'] as const).map((ratio) => (
+                        {(['16:9', '1:1', '9:16'] as const).map((ratio) => (
                   <button
                     key={ratio}
                     onClick={() => setAspectRatio(ratio)}
                     className={`rounded-2xl py-2 text-sm font-semibold border transition ${
                       aspectRatio === ratio
-                        ? 'bg-gradient-to-r from-brand-cyan to-brand-yellow text-brand-obsidian border-transparent shadow-glow'
+                        ? 'bg-gradient-to-r from-brand-teal to-brand-red text-brand-obsidian border-transparent shadow-glow'
                         : 'border-white/10 text-white/50 hover:text-white'
                     }`}
                   >
@@ -145,7 +145,7 @@ const Phase2bGenAI: React.FC = () => {
             <button
               onClick={handleGenerate}
               disabled={loading || !prompt.trim()}
-              className="w-full rounded-2xl py-3 font-semibold text-brand-obsidian bg-gradient-to-r from-brand-cyan to-brand-yellow flex items-center justify-center gap-2 shadow-glow disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
+              className="w-full rounded-2xl py-3 font-semibold text-brand-obsidian bg-gradient-to-r from-brand-teal to-brand-red flex items-center justify-center gap-2 shadow-glow disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
             >
               {loading ? 'Processing…' : (
                 <>
