@@ -82,19 +82,26 @@ const Phase3_Editor: React.FC = () => {
     });
   };
 
-  const addImage = (dataUrl: string) => {
+  const addImage = async (dataUrl: string) => {
     if (!fabricRef.current) return;
 
-    fabric.Image.fromURL(dataUrl, (img) => {
+    try {
+      const img = await fabric.FabricImage.fromURL(dataUrl, {
+        crossOrigin: 'anonymous',
+      });
+      
       img.scaleToWidth(800);
       img.set({
         left: 100,
         top: 100,
       });
-      fabricRef.current?.add(img);
-      fabricRef.current?.setActiveObject(img);
-      fabricRef.current?.renderAll();
-    }, { crossOrigin: 'anonymous' });
+      
+      fabricRef.current.add(img);
+      fabricRef.current.setActiveObject(img);
+      fabricRef.current.renderAll();
+    } catch (error) {
+      console.error('Error adding image:', error);
+    }
   };
 
   const addText = (text?: string) => {
@@ -110,12 +117,12 @@ const Phase3_Editor: React.FC = () => {
       strokeWidth: 6,
       fontWeight: 'bold',
       textAlign: 'center',
-      shadow: new fabric.Shadow({
+      shadow: {
         color: 'rgba(0,0,0,0.8)',
         blur: 15,
         offsetX: 4,
         offsetY: 4,
-      }),
+      },
     });
 
     fabricRef.current.add(textObj);
@@ -143,27 +150,29 @@ const Phase3_Editor: React.FC = () => {
   };
 
   const adjustBrightness = (delta: number) => {
-    if (!fabricRef.current || !selectedObject || selectedObject.type !== 'image') return;
-    const imgObj = selectedObject as fabric.Image;
+    if (!fabricRef.current || !selectedObject || !(selectedObject instanceof fabric.FabricImage)) return;
+    const imgObj = selectedObject as any;
     
     const currentBrightness = (imgObj.filters?.find((f: any) => f.type === 'Brightness') as any)?.brightness || 0;
     const newBrightness = Math.max(-1, Math.min(1, currentBrightness + delta));
     
-    imgObj.filters = imgObj.filters?.filter((f: any) => f.type !== 'Brightness') || [];
-    imgObj.filters.push(new fabric.Image.filters.Brightness({ brightness: newBrightness }) as any);
+    if (!imgObj.filters) imgObj.filters = [];
+    imgObj.filters = imgObj.filters.filter((f: any) => f.type !== 'Brightness');
+    imgObj.filters.push(new fabric.filters.Brightness({ brightness: newBrightness }));
     imgObj.applyFilters();
     fabricRef.current.renderAll();
   };
 
   const adjustContrast = (delta: number) => {
-    if (!fabricRef.current || !selectedObject || selectedObject.type !== 'image') return;
-    const imgObj = selectedObject as fabric.Image;
+    if (!fabricRef.current || !selectedObject || !(selectedObject instanceof fabric.FabricImage)) return;
+    const imgObj = selectedObject as any;
     
     const currentContrast = (imgObj.filters?.find((f: any) => f.type === 'Contrast') as any)?.contrast || 0;
     const newContrast = Math.max(-1, Math.min(1, currentContrast + delta));
     
-    imgObj.filters = imgObj.filters?.filter((f: any) => f.type !== 'Contrast') || [];
-    imgObj.filters.push(new fabric.Image.filters.Contrast({ contrast: newContrast }) as any);
+    if (!imgObj.filters) imgObj.filters = [];
+    imgObj.filters = imgObj.filters.filter((f: any) => f.type !== 'Contrast');
+    imgObj.filters.push(new fabric.filters.Contrast({ contrast: newContrast }));
     imgObj.applyFilters();
     fabricRef.current.renderAll();
   };
@@ -234,7 +243,7 @@ const Phase3_Editor: React.FC = () => {
                   <ArrowDown className="w-4 h-4" />
                 </button>
 
-                {selectedObject.type === 'image' && (
+                {selectedObject instanceof fabric.FabricImage && (
                   <>
                     <div className="w-px h-6 bg-white/10"></div>
                     
